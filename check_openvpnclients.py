@@ -1,5 +1,4 @@
 #! /usr/bin/python3
-# coding: utf-8
 
 # Check if an OpenVPN server runs with the management interface
 # and displays the list of clients connected to the VPN.
@@ -16,6 +15,7 @@ import telnetlib
 import sys
 import argparse
 import socket
+import time
 
 arguments = dict()
 return_codes = {'OK': 0,
@@ -51,6 +51,7 @@ def telnet_request():
         print("Verify that the management interface is enabled on port {0} or specify another port with the parameter --qport".format(arguments["queryport"]))
         sys.exit(return_codes['UNKNOWN'])
     tn.write(b"status \n")
+    time.sleep(0.5)
     tn.write(b"exit \n")
     tn.read_until(str.encode("Since\r\n"))
     reponse = tn.read_until(str.encode("\r\nROUTING TABLE"))
@@ -61,7 +62,7 @@ def processing(clientlist):
     """
     TRAITEMENT
     """
-    clientlist = clientlist.decode('ascii').rstrip('\r\nROUTING TABLE')
+    clientlist = clientlist.decode('utf8').rstrip('\r\nROUTING TABLE')
     tabl_resultat = clientlist.split('\n')
     resultat = ""
     i=0
@@ -77,9 +78,9 @@ def default_print(tablReponse):
     if len(tablReponse) == 0:
         print("Aucun client connecté.")
     elif len(tablReponse) == 1:
-        print("Il y a " + str(len(tablReponse))    + " client connecté :", end=' ')
+        print(" {0} client connected :".format(len(tablReponse)), end=' ')
     else:
-        print("Il y a " + str(len(tablReponse))    + " clients connectés :", end=' '),
+        print(" {0} clients connected :".format(len(tablReponse)), end=' ')
     for client in tablReponse:
         print(client, end=', ')
     print("| clients=" + str(len(tablReponse)))
@@ -91,9 +92,9 @@ def html_print(tablReponse):
     if len(tablReponse) == 0:
         print("Aucun client connecté.")
     elif len(tablReponse) == 1:
-        print("Il y a " + str(len(tablReponse))    + " client connecté :", end='')
+        print(" {0} client connected :".format(len(tablReponse)), end=' ')
     else:
-        print("Il y a " + str(len(tablReponse))    + " clients connectés :", end=''),
+        print(" {0} clients connected :".format(len(tablReponse)), end=' ')
     print("<ul>", end='')
     for client in tablReponse:
         print("<li>" + client + "</li>", end='')
